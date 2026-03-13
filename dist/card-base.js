@@ -252,6 +252,7 @@ export class BaseLLMVisionCard extends HTMLElement {
 
         const normalize = (value) => (typeof value === 'string' ? value.trim().toLowerCase() : value);
         const shouldShowCategory = Boolean(category && !(label && normalize(label) === normalize(category)));
+        const hasSnapshot = typeof keyFrame === 'string' ? keyFrame.trim().length > 0 : Boolean(keyFrame);
 
         const htmlBlock = `
                 <div>
@@ -266,6 +267,7 @@ export class BaseLLMVisionCard extends HTMLElement {
                                 <ha-icon icon="mdi:dots-vertical"></ha-icon>
                             </button>
                             <div class="${menuListClass}" hidden>
+                                ${hasSnapshot ? `
                                 <div class="${prefix}-menu-rate-row">
                                     <button class="${menuItemClass} ${menuThumbUpClass}" title="Good response">
                                         <ha-icon icon="mdi:thumb-up-outline"></ha-icon>
@@ -273,7 +275,7 @@ export class BaseLLMVisionCard extends HTMLElement {
                                     <button class="${menuItemClass} ${menuThumbDownClass}" title="Bad response">
                                         <ha-icon icon="mdi:thumb-down-outline"></ha-icon>
                                     </button>
-                                </div>
+                                </div>` : ''}
                                 <button class="${menuItemClass} ${menuDeleteClass}" title="Delete event">
                                     <ha-icon icon="mdi:trash-can-outline"></ha-icon>
                                     <span>${translate('delete', this.language) || 'Delete'}</span>
@@ -580,7 +582,7 @@ export class BaseLLMVisionCard extends HTMLElement {
         // Wire up thumbs up / thumbs down inside menu
         const thumbsUpItem = wrapper.querySelector(`.${menuThumbUpClass}`);
         const thumbsDownItem = wrapper.querySelector(`.${menuThumbDownClass}`);
-        const sendFeedback = async (feedback, el, reason, userFeedbackText, correctedTitle = '', correctedDescription = '') => {
+        const sendFeedback = async (feedback, el, reason, userFeedbackText, correctedTitle = '', correctedDescription = '', correctedLabel = '', correctedCategory = '') => {
             if (el.disabled) return;
             el.disabled = true;
             const eventDetail = { eventId, feedback };
@@ -598,60 +600,63 @@ export class BaseLLMVisionCard extends HTMLElement {
             };
 
             try {
-                // Only attempt upload if we have a keyFrame URL
+                let blob = null;
+                let filename = '';
+
+                // Image is optional: if unavailable, still submit feedback payload.
                 if (keyFrame) {
-                    let blob;
-                    if (keyFrame.startsWith('data:')) {
-                        const res = await fetch(keyFrame);
-                        blob = await res.blob();
-                    } else {
-                        const res = await fetch(keyFrame, { mode: 'cors' });
-                        blob = await res.blob();
-                    }
-
-                    const contentType = blob.type || 'image/jpeg';
-                    const ext = contentType.split('/')[1] || 'jpg';
-                    const filename = `event_${eventId || Date.now()}.${ext}`;
-
-                    // Send request to feedback API
-                    const app_key = 'e2d892b226e34339940079041ebc65fed345a5cdbd888b6f042ec2c44e0f9a2a';
                     try {
-                        const form = new FormData();
-                        form.append('image', blob, filename);
-                        form.append('isTitle', metadata.title || '');
-                        form.append('shouldBeTitle', correctedTitle || event || '');
-                        form.append('isDescription', metadata.description || '');
-                        form.append('shouldBeDescription', correctedDescription || summary || '');
-                        form.append('isLabel', metadata.label || '');
-                        form.append('shouldBeLabel', label || '');
-                        form.append('isCategory', metadata.category || '');
-                        form.append('shouldBeCategory', category || '');
-                        form.append('isIcon', metadata.icon || '');
-                        form.append('shouldBeIcon', icon || '');
-                        form.append('upDown', feedback || '');
-                        form.append('reason', reason || '');
-                        // Include any additional feedback provided by the user
-                        form.append('feedback', userFeedbackText || '');
-
-                        const res = await fetch('https://feedback.llmvision.org/', {
-                            method: 'POST',
-                            headers: {
-                                'X-App-Key': app_key
-                            },
-                            body: form,
-                            mode: 'cors'
-                        });
-
-                        if (!res.ok) {
-                            const text = await res.text().catch(() => '');
-                            console.error('Feedback upload failed:', res.status, text);
-                        } else {
-                            console.log('Feedback uploaded successfully');
-                        }
-                    } catch (err) {
-                        console.error('Error uploading snapshot to feedback API:', err);
+                        const imageRes = keyFrame.startsWith('data:')
+                            ? await fetch(keyFrame)
+                            : await fetch(keyFrame, { mode: 'cors' });
+                        blob = await imageRes.blob();
+                        const contentType = blob.type || 'image/jpeg';
+                        const ext = contentType.split('/')[1] || 'jpg';
+                        filename = `event_${eventId || Date.now()}.${ext}`;
+                    } catch (imageErr) {
+                        console.warn('Unable to fetch key frame for feedback upload; submitting feedback without image.', imageErr);
                     }
+                }
 
+                // Send request to feedback API
+                const app_key = 'e2d892b226e34339940079041ebc65fed345a5cdbd888b6f042ec2c44e0f9a2a';
+                try {
+                    const form = new FormData();
+                    if (blob) {
+                        form.append('image', blob, filename || `event_${eventId || Date.now()}.jpg`);
+                    }
+                    form.append('isTitle', metadata.title || '');
+                    form.append('shouldBeTitle', correctedTitle || event || '');
+                    form.append('isDescription', metadata.description || '');
+                    form.append('shouldBeDescription', correctedDescription || summary || '');
+                    form.append('isLabel', metadata.label || '');
+                    form.append('shouldBeLabel', correctedLabel || label || '');
+                    form.append('isCategory', metadata.category || '');
+                    form.append('shouldBeCategory', correctedCategory || category || '');
+                    form.append('isIcon', metadata.icon || '');
+                    form.append('shouldBeIcon', icon || '');
+                    form.append('upDown', feedback || '');
+                    form.append('reason', reason || '');
+                    // Include any additional feedback provided by the user
+                    form.append('feedback', userFeedbackText || '');
+
+                    const res = await fetch('https://feedback.llmvision.org/', {
+                        method: 'POST',
+                        headers: {
+                            'X-App-Key': app_key
+                        },
+                        body: form,
+                        mode: 'cors'
+                    });
+
+                    if (!res.ok) {
+                        const text = await res.text().catch(() => '');
+                        console.error('Feedback upload failed:', res.status, text);
+                    } else {
+                        console.log('Feedback uploaded successfully');
+                    }
+                } catch (err) {
+                    console.error('Error uploading snapshot to feedback API:', err);
                 }
             } catch (err) {
                 console.error('Error uploading snapshot to feedback API:', err);
@@ -666,7 +671,7 @@ export class BaseLLMVisionCard extends HTMLElement {
             const fdContentClass = `${prefix}-feedback-detail-content`;
             const fdWrapper = document.createElement('div');
 
-            // Page templates
+            // Reasons list
             const reasons = [
                 { value: 'event_not_no_activity', label: `Event is not 'no activity'` },
                 { value: 'event_is_no_activity', label: `Event should be 'no activity'` },
@@ -677,6 +682,14 @@ export class BaseLLMVisionCard extends HTMLElement {
                 { value: 'other', label: 'Other' }
             ];
 
+            const normalizedEventTitle = (event || '').trim().toLowerCase();
+            const filteredReasons = reasons.filter((reason) => {
+                if (normalizedEventTitle.includes('no activity')) {
+                    return reason.value !== 'event_is_no_activity';
+                }
+                return reason.value !== 'event_not_no_activity';
+            });
+
             fdWrapper.innerHTML = `
                 <div class="${fdOverlayClass}">
                     <div class="${fdContentClass}">
@@ -684,7 +697,7 @@ export class BaseLLMVisionCard extends HTMLElement {
                             <div class="${prefix}-fd-page ${prefix}-fd-page-1">
                                 <h2>${translate('feedback_reason', this.language) || 'Select reason'}</h2>
                                 <div class="${prefix}-fd-reason-list">
-                                    ${reasons.map(r => `
+                                    ${filteredReasons.map(r => `
                                         <button type="button" class="${prefix}-fd-reason-btn" data-value="${r.value}">${r.label}</button>
                                     `).join('')}
                                 </div>
@@ -803,9 +816,36 @@ export class BaseLLMVisionCard extends HTMLElement {
                             <label style="display:block;margin:8px 0;font-weight:600">${translate('correct_description', this.language) || 'Correct description'}</label>
                             <textarea class="${prefix}-fd-correct-description" rows="4" style="width:100%;padding:8px;border-radius:6px;border:1px solid rgba(0,0,0,0.12)"></textarea>
                         `;
-                    } else {
+                    } else if (reason === 'title_inaccurate') {
                         page2Content.innerHTML = `
-                            <p style="margin:6px 0">${translate('confirm_selection', this.language) || 'You can add more details on the next page.'}</p>
+                            <label style="display:block;margin:8px 0;font-weight:600">${translate('correct_title', this.language) || 'Correct title'}</label>
+                            <input class="${prefix}-fd-correct-title" type="text" style="width:100%;padding:8px;border-radius:6px;border:1px solid rgba(0,0,0,0.12)">
+                        `;
+                    } else if (reason === 'description_inaccurate') {
+                        page2Content.innerHTML = `
+                            <label style="display:block;margin:8px 0;font-weight:600">${translate('correct_description', this.language) || 'Correct description'}</label>
+                            <textarea class="${prefix}-fd-correct-description" rows="4" style="width:100%;padding:8px;border-radius:6px;border:1px solid rgba(0,0,0,0.12)"></textarea>
+                        `;
+                    } else if (reason === 'incorrect_label') {
+                        page2Content.innerHTML = `
+                            <label style="display:block;margin:8px 0;font-weight:600">${translate('correct_label', this.language) || 'Correct label'}</label>
+                            <input class="${prefix}-fd-correct-label" type="text" style="width:100%;padding:8px;border-radius:6px;border:1px solid rgba(0,0,0,0.12)">
+                        `;
+                    } else if (reason === 'incorrect_category') {
+                        page2Content.innerHTML = `
+                            <label style="display:block;margin:8px 0;font-weight:600">${translate('correct_category', this.language) || 'Correct category'}</label>
+                            <input class="${prefix}-fd-correct-category" type="text" style="width:100%;padding:8px;border-radius:6px;border:1px solid rgba(0,0,0,0.12)">
+                        `;
+                    }
+                    
+                    else if (reason === 'other') {
+                        page2Content.innerHTML = `
+                            <p style="margin:6px 0">${translate('please_provide_details', this.language) || 'Please provide more details on the next page.'}</p>
+                        `;
+                    }
+                    else {
+                        page2Content.innerHTML = `
+                            <p style="margin:6px 0">${translate('please_provide_details', this.language) || 'Please provide more details on the next page.'}</p>
                         `;
                     }
                     page2.dataset.reason = reason;
@@ -839,7 +879,9 @@ export class BaseLLMVisionCard extends HTMLElement {
                 page3.hidden = false;
                 // ensure close button stays as back-arrow
                 if (closeFdBtn) {
-                    closeFdBtn.textContent = '<-';
+                    closeFdBtn.innerHTML = `
+                        <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="m313-440 196 196q12 12 11.5 28T508-188q-12 11-28 11.5T452-188L188-452q-6-6-8.5-13t-2.5-15q0-8 2.5-15t8.5-13l264-264q11-11 27.5-11t28.5 11q12 12 12 28.5T508-715L313-520h447q17 0 28.5 11.5T800-480q0 17-11.5 28.5T760-440H313Z"/></svg>
+                    `;
                     closeFdBtn.title = 'Back';
                     closeFdBtn.setAttribute('aria-label', 'Back');
                 }
@@ -862,16 +904,34 @@ export class BaseLLMVisionCard extends HTMLElement {
                 // Include any title/description corrections from page2 (if present)
                 let correctedTitle = '';
                 let correctedDescription = '';
+                let correctedLabel = '';
+                let correctedCategory = '';
                 if (reason === 'event_not_no_activity') {
                     const t = fdWrapper.querySelector(`.${prefix}-fd-correct-title`);
                     const d = fdWrapper.querySelector(`.${prefix}-fd-correct-description`);
                     correctedTitle = t ? (t.value || '').trim() : '';
                     correctedDescription = d ? (d.value || '').trim() : '';
                 }
-                await sendFeedback(feedback, el, reason, finalText, correctedTitle, correctedDescription);
+                else if (reason === 'title_inaccurate') {
+                    const t = fdWrapper.querySelector(`.${prefix}-fd-correct-title`);
+                    correctedTitle = t ? (t.value || '').trim() : '';
+                }
+                else if (reason === 'description_inaccurate') {
+                    const d = fdWrapper.querySelector(`.${prefix}-fd-correct-description`);
+                    correctedDescription = d ? (d.value || '').trim() : '';
+                }
+                else if (reason === 'incorrect_label') {
+                    const l = fdWrapper.querySelector(`.${prefix}-fd-correct-title`);
+                    correctedLabel = l ? (l.value || '').trim() : '';
+                }
+                else if (reason === 'incorrect_category') {
+                    const c = fdWrapper.querySelector(`.${prefix}-fd-correct-title`);
+                    correctedCategory = c ? (c.value || '').trim() : '';
+                }
+                await sendFeedback(feedback, el, reason, finalText, correctedTitle, correctedDescription, correctedLabel, correctedCategory);
                 removeFd();
                 // open snackbar to thank the user for their feedback
-                showSnackbar('Thanks for your feedback!');  //TODO: translate
+                showSnackbar(translate('thanks_for_feedback', this.language) || 'Thanks for your feedback!');
             });
 
             document.body.appendChild(fdWrapper);
@@ -895,8 +955,8 @@ export class BaseLLMVisionCard extends HTMLElement {
                 e.stopPropagation();
                 if (menuList) menuList.hidden = true;
                 // open snackbar to thank the user for their feedback
-                sendFeedback('up', thumbsUpItem, 'good_response', '', '');
-                showSnackbar('Thanks for your feedback!'); //TODO: translate
+                sendFeedback('up', thumbsUpItem, 'good_response', '', '', '', '', '');
+                showSnackbar(translate('thanks_for_feedback', this.language) || 'Thanks for your feedback!');
             });
         }
         if (thumbsDownItem && eventId) {
@@ -916,7 +976,11 @@ export class BaseLLMVisionCard extends HTMLElement {
         overlay.classList.remove('show');
         overlay.addEventListener('transitionend', () => {
             if (wrapper._escHandler) document.removeEventListener('keydown', wrapper._escHandler);
-            document.body.removeChild(wrapper);
+            try {
+                document.body.removeChild(wrapper);
+            } catch (err) {
+                // already removed
+            }
         }, { once: true });
         if (history.state && history.state.popupOpen) {
             history.replaceState(null, '');
