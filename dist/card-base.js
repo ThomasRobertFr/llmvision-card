@@ -46,7 +46,14 @@ export class BaseLLMVisionCard extends HTMLElement {
         }
     }
 
-    async fetchEvents(hass, limit = 10, days = 7, cameras = [], categories = []) {
+    async fetchEvents(hass, {
+        limit = 10,
+        days = null,
+        hours = null,
+        cameras = [],
+        categories = [],
+        includeNoActivity = false
+    } = {}) {
         try {
             const params = new URLSearchParams();
             if (limit) params.set('limit', limit);
@@ -54,9 +61,11 @@ export class BaseLLMVisionCard extends HTMLElement {
                 params.set('cameras', cameras.join(','));
             }
             if (days) params.set('days', days);
+            if (hours) params.set('hours', hours);
             if (categories?.length) {
                 params.set('categories', categories.join(','));
             }
+            params.set('include_no_activity', includeNoActivity ? 'true' : 'false');
 
             const path = `llmvision/timeline/events${params.toString() ? '?' + params.toString() : ''}`;
             const data = await hass.callApi('GET', path);
@@ -96,42 +105,6 @@ export class BaseLLMVisionCard extends HTMLElement {
 
     _hashState(base) {
         return JSON.stringify(base);
-    }
-
-    _filterNoActivity(details) {
-        return details.filter((d) => (d?.title || '').trim().toLowerCase() !== 'no activity observed');
-    }
-
-    _filterByHours(details, hours) {
-        if (!hours) return details;
-        const cutoff = Date.now() - hours * 3600 * 1000;
-        return details.filter(d => new Date(d.startTime).getTime() >= cutoff);
-    }
-
-    _filterByCategories(details) {
-        if (!this.category_filters?.length) return details;
-        return details.filter(d => {
-            if (!d.category) return false;
-            return this.category_filters.includes(d.category);
-        });
-    }
-
-    _filterByCameras(details) {
-        if (!this.camera_filters?.length) return details;
-        return details.filter(d => {
-            if (!d.cameraEntityId) return true;
-            return this.camera_filters.includes(d.cameraEntityId);
-        });
-    }
-
-    _applyAllFilters(details) {
-        let res = details;
-        if (this.filter_false_positives) {
-            res = this._filterNoActivity(res);
-        }
-        res = this._filterByCategories(res);
-        res = this._filterByCameras(res);
-        return res;
     }
 
     _sort(details) {

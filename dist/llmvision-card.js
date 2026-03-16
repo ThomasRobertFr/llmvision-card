@@ -236,12 +236,15 @@ class LLMVisionCard extends BaseLLMVisionCard {
     async _loadAndRender(hass) {
         let details = await this.fetchEvents(
             hass,
-            this.number_of_events,
-            this.number_of_days,
-            this.camera_filters,
-            this.category_filters);
+            {
+                limit: this.number_of_events,
+                hours: this.number_of_days,
+                cameras: this.camera_filters,
+                categories: this.category_filters,
+                includeNoActivity: !this.filter_false_positives
+            }
+        );
         if (!details) return;
-        details = this._applyAllFilters(details);
 
         const currentHash = this._hashState({
             ...details,
