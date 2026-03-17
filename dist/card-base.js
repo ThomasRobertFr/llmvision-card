@@ -1,6 +1,6 @@
-import { translate, hexToRgba } from './helpers.js?v=1.6.0';
+import { translate, hexToRgba } from './helpers.js?v=1.6.1';
 
-const __LLMVISION_VERSION = 'v1.6.0';
+const __LLMVISION_VERSION = 'v1.6.1 beta 2';
 function __logLLMVisionBadge(context) {
     if (!window.__LLMVISION_BADGE_LOGGED) {
         console.log(
@@ -648,8 +648,7 @@ export class BaseLLMVisionCard extends HTMLElement {
             const reasons = [
                 { value: 'event_not_no_activity', label: `Event is not 'no activity'` },
                 { value: 'event_is_no_activity', label: `Event should be 'no activity'` },
-                { value: 'title_inaccurate', label: 'Title is not accurate' },
-                { value: 'description_inaccurate', label: 'Description is not accurate' },
+                { value: 'incorrect_title_description', label: 'Incorrect title/descriptions' },
                 { value: 'incorrect_label', label: 'Incorrect label' },
                 { value: 'incorrect_category', label: 'Incorrect category' },
                 { value: 'other', label: 'Other' }
@@ -789,13 +788,10 @@ export class BaseLLMVisionCard extends HTMLElement {
                             <label style="display:block;margin:8px 0;font-weight:600">${translate('correct_description', this.language) || 'Correct description'}</label>
                             <textarea class="${prefix}-fd-correct-description" rows="4" style="width:100%;padding:8px;border-radius:6px;border:1px solid rgba(0,0,0,0.12)"></textarea>
                         `;
-                    } else if (reason === 'title_inaccurate') {
+                    } else if (reason === 'incorrect_title_description') {
                         page2Content.innerHTML = `
                             <label style="display:block;margin:8px 0;font-weight:600">${translate('correct_title', this.language) || 'Correct title'}</label>
                             <input class="${prefix}-fd-correct-title" type="text" style="width:100%;padding:8px;border-radius:6px;border:1px solid rgba(0,0,0,0.12)">
-                        `;
-                    } else if (reason === 'description_inaccurate') {
-                        page2Content.innerHTML = `
                             <label style="display:block;margin:8px 0;font-weight:600">${translate('correct_description', this.language) || 'Correct description'}</label>
                             <textarea class="${prefix}-fd-correct-description" rows="4" style="width:100%;padding:8px;border-radius:6px;border:1px solid rgba(0,0,0,0.12)"></textarea>
                         `;
@@ -885,12 +881,10 @@ export class BaseLLMVisionCard extends HTMLElement {
                     correctedTitle = t ? (t.value || '').trim() : '';
                     correctedDescription = d ? (d.value || '').trim() : '';
                 }
-                else if (reason === 'title_inaccurate') {
+                else if (reason === 'incorrect_title_description') {
                     const t = fdWrapper.querySelector(`.${prefix}-fd-correct-title`);
-                    correctedTitle = t ? (t.value || '').trim() : '';
-                }
-                else if (reason === 'description_inaccurate') {
                     const d = fdWrapper.querySelector(`.${prefix}-fd-correct-description`);
+                    correctedTitle = t ? (t.value || '').trim() : '';
                     correctedDescription = d ? (d.value || '').trim() : '';
                 }
                 else if (reason === 'incorrect_label') {
