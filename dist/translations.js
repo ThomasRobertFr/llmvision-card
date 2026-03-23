@@ -107,7 +107,7 @@ export const de = {
         "send": "Absenden",
         "correct_title": "Korrekte Bezeichnung",
         "correct_description": "Korrekte Beschreibung",
-        "correct_category": "Korrekte Kategorie",
+        "correct_category": "Korrekte Kategorie auswählen",
         "correct_label": "Korrektes Etikett",
         "please_provide_details": "Bitte geben Sie auf der nächsten Seite weitere Details an.",
         "thanks_for_feedback": "Danke für Ihr Feedback!"
@@ -131,7 +131,7 @@ export const en = {
         "correct_title": "Correct title",
         "correct_description": "Correct description",
         "correct_category": "Correct category",
-        "correct_label": "Correct label",
+        "correct_label": "Pick the correct label",
         "please_provide_details": "Please provide more details on the next page.",
         "thanks_for_feedback": "Thank you for your feedback!"
     }

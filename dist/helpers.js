@@ -1,5 +1,5 @@
-import { labels } from './labels.js?v=1.6.0';
-import { bg, ca, cs, da, de, en, es, fr, hu, it, nl, pl, pt, sk, sv, el } from './translations.js?v=1.6.1';
+import { labels } from './labels.js?v=1.7.0';
+import { bg, ca, cs, da, de, en, es, fr, hu, it, nl, pl, pt, sk, sv, el } from './translations.js?v=1.7.0';
 
 export function hexToRgba(hex, alpha = 1) {
     let c = hex.replace('#', '');

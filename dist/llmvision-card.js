@@ -196,6 +196,9 @@ class LLMVisionCard extends BaseLLMVisionCard {
             // Adhere to the grid cell allocated to the card
             this.style.display = 'block';
             this.style.height = '100%';
+            this.style.width = '100%';
+            this.style.maxWidth = '100%';
+            this.style.boxSizing = 'border-box';
 
             this.innerHTML = `
                 <ha-card style="padding:16px;">
@@ -204,12 +207,13 @@ class LLMVisionCard extends BaseLLMVisionCard {
                 </ha-card>
                 <style>
                     /* Stretch the card to the allocated grid cell */
-                    ha-card{height:100%;display:flex;flex-direction:column;box-sizing:border-box;}
+                    :host{display:block;width:100%;max-width:100%;box-sizing:border-box;}
+                    ha-card{height:100%;width:100%;max-width:100%;margin:0;display:flex;flex-direction:column;box-sizing:border-box;overflow:hidden;}
 
                     /* The scrollable content area inside the card */
-                    .card-content{padding:0;flex:1 1 auto;min-height:0;overflow:auto;}
+                    .card-content{padding:0;flex:1 1 auto;min-height:0;min-width:0;overflow:auto;overflow-x:hidden;}
 
-                    .event-container{display:flex;align-items:center;justify-content:flex-start;height:75px;cursor:pointer;margin-bottom:8px;}
+                    .event-container{display:flex;align-items:center;justify-content:flex-start;height:75px;cursor:pointer;margin-bottom:8px;min-width:0;overflow:hidden;}
                     .event-container.empty-state{height:100%;justify-content:center;align-items:center;text-align:center;cursor:default;margin-bottom:0;}
                     .event-container:last-child{margin-bottom:0;}
                     .event-container img{height:100%;aspect-ratio:1/1;margin-left:auto;border-radius:12px;object-fit:cover;}
@@ -238,7 +242,7 @@ class LLMVisionCard extends BaseLLMVisionCard {
             hass,
             {
                 limit: this.number_of_events,
-                hours: this.number_of_days,
+                days: this.number_of_days,
                 cameras: this.camera_filters,
                 categories: this.category_filters,
                 includeNoActivity: !this.filter_false_positives

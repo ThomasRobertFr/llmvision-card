@@ -1,6 +1,6 @@
-import { translate, hexToRgba } from './helpers.js?v=1.6.1';
+import { translate, hexToRgba } from './helpers.js?v=1.7.0';
 
-const __LLMVISION_VERSION = 'v1.6.1 beta 2';
+const __LLMVISION_VERSION = 'v1.7.0 beta 3';
 function __logLLMVisionBadge(context) {
     if (!window.__LLMVISION_BADGE_LOGGED) {
         console.log(
@@ -650,7 +650,6 @@ export class BaseLLMVisionCard extends HTMLElement {
                 { value: 'event_is_no_activity', label: `Event should be 'no activity'` },
                 { value: 'incorrect_title_description', label: 'Incorrect title/descriptions' },
                 { value: 'incorrect_label', label: 'Incorrect label' },
-                { value: 'incorrect_category', label: 'Incorrect category' },
                 { value: 'other', label: 'Other' }
             ];
 
@@ -667,7 +666,7 @@ export class BaseLLMVisionCard extends HTMLElement {
                     <div class="${fdContentClass}">
                         <button class="${prefix}-fd-close" title="Close" aria-label="Close" style="font-size:20px">✕</button>
                             <div class="${prefix}-fd-page ${prefix}-fd-page-1">
-                                <h2>${translate('feedback_reason', this.language) || 'Select reason'}</h2>
+                                <h2>${translate('feedback_reason', this.language) || 'Select a reason'}</h2>
                                 <div class="${prefix}-fd-reason-list">
                                     ${filteredReasons.map(r => `
                                         <button type="button" class="${prefix}-fd-reason-btn" data-value="${r.value}">${r.label}</button>
@@ -751,8 +750,17 @@ export class BaseLLMVisionCard extends HTMLElement {
                         closeFdBtn.title = 'Close';
                         closeFdBtn.setAttribute('aria-label', 'Close');
                     } else if (!page3.hidden) {
-                        // on page3 -> go back to page2
+                        // on page3 -> go back to page2 (or page1 when page2 was skipped)
+                        const selectedReason = page2.dataset.reason || '';
                         page3.hidden = true;
+                        if (selectedReason === 'other') {
+                            page2.hidden = true;
+                            page1.hidden = false;
+                            closeFdBtn.textContent = '✕';
+                            closeFdBtn.title = 'Close';
+                            closeFdBtn.setAttribute('aria-label', 'Close');
+                            return;
+                        }
                         page2.hidden = false;
                         closeFdBtn.innerHTML = `
                             <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="m313-440 196 196q12 12 11.5 28T508-188q-12 11-28 11.5T452-188L188-452q-6-6-8.5-13t-2.5-15q0-8 2.5-15t8.5-13l264-264q11-11 27.5-11t28.5 11q12 12 12 28.5T508-715L313-520h447q17 0 28.5 11.5T800-480q0 17-11.5 28.5T760-440H313Z"/></svg>
@@ -797,19 +805,29 @@ export class BaseLLMVisionCard extends HTMLElement {
                         `;
                     } else if (reason === 'incorrect_label') {
                         page2Content.innerHTML = `
-                            <label style="display:block;margin:8px 0;font-weight:600">${translate('correct_label', this.language) || 'Correct label'}</label>
-                            <input class="${prefix}-fd-correct-label" type="text" style="width:100%;padding:8px;border-radius:6px;border:1px solid rgba(0,0,0,0.12)">
-                        `;
-                    } else if (reason === 'incorrect_category') {
-                        page2Content.innerHTML = `
-                            <label style="display:block;margin:8px 0;font-weight:600">${translate('correct_category', this.language) || 'Correct category'}</label>
-                            <input class="${prefix}-fd-correct-category" type="text" style="width:100%;padding:8px;border-radius:6px;border:1px solid rgba(0,0,0,0.12)">
-                        `;
-                    }
-                    
-                    else if (reason === 'other') {
-                        page2Content.innerHTML = `
-                            <p style="margin:6px 0">${translate('please_provide_details', this.language) || 'Please provide more details on the next page.'}</p>
+                            <label style="display:block;margin:8px 0;font-weight:600">${translate('correct_label', this.language) || 'Pick the correct label'}</label>
+                            <select class="${prefix}-fd-correct-label" style="width:100%;padding:8px;border-radius:6px;border:1px solid rgba(0,0,0,0.12)">
+                                <option value="Alarm">Alarm</option>
+                                <option value="Bicycle">Bicycle</option>
+                                <option value="Bird">Bird</option>
+                                <option value="Bus">Bus</option>
+                                <option value="Camera">Camera</option>
+                                <option value="Car">Car</option>
+                                <option value="Cat">Cat</option>
+                                <option value="Dog">Dog</option>
+                                <option value="Door">Door</option>
+                                <option value="Key">Key</option>
+                                <option value="Light">Light</option>
+                                <option value="Lock">Lock</option>
+                                <option value="Motorcycle">Motorcycle</option>
+                                <option value="Package">Package</option>
+                                <option value="Person">Person</option>
+                                <option value="Plant">Plant</option>
+                                <option value="Sensor">Sensor</option>
+                                <option value="Tree">Tree</option>
+                                <option value="Truck">Truck</option>
+                                <option value="Van">Van</option>
+                            </select>
                         `;
                     }
                     else {
@@ -819,7 +837,13 @@ export class BaseLLMVisionCard extends HTMLElement {
                     }
                     page2.dataset.reason = reason;
                     page1.hidden = true;
-                    page2.hidden = false;
+                    if (reason === 'other') {
+                        page2.hidden = true;
+                        page3.hidden = false;
+                    } else {
+                        page2.hidden = false;
+                        page3.hidden = true;
+                    }
                     // change close button into back-arrow
                     if (closeFdBtn) {
                         closeFdBtn.innerHTML = `
@@ -888,7 +912,7 @@ export class BaseLLMVisionCard extends HTMLElement {
                     correctedDescription = d ? (d.value || '').trim() : '';
                 }
                 else if (reason === 'incorrect_label') {
-                    const l = fdWrapper.querySelector(`.${prefix}-fd-correct-title`);
+                    const l = fdWrapper.querySelector(`.${prefix}-fd-correct-label`);
                     correctedLabel = l ? (l.value || '').trim() : '';
                 }
                 else if (reason === 'incorrect_category') {
