@@ -3,7 +3,7 @@ export const labels = {
         "labels": {
             "person": "mdi:walk",
         },
-        "color": "#FF9800"
+        "color": "#3B82F6"
     },
     "vehicle": {
         "labels": {
@@ -11,24 +11,25 @@ export const labels = {
             "truck": "mdi:truck",
             "van": "mdi:van-utility",
             "bus": "mdi:bus",
-            "bike": "mdi:bike",
+            "bicycle": "mdi:bike",
             "motorcycle": "mdi:motorbike"
         },
-        "color": "#2196F3"
+        "color": "#64748B"
     },
-    "package": {
+    "delivery": {
         "labels": {
             "package": "mdi:package-variant-closed"
         },
-        "color": "#8D6E63"
+        "color": "#EA580C"
     },
     "animal": {
         "labels": {
             "dog": "mdi:dog",
             "cat": "mdi:cat",
-            "bird": "mdi:bird"
+            "bird": "mdi:bird",
+            "animal": "mdi:paw"
         },
-        "color": "#43A047"
+        "color": "#F59E0B"
     },
     "entity": {
         "labels": {
@@ -40,13 +41,13 @@ export const labels = {
             "lock": "mdi:lock",
             "alarm": "mdi:alarm-light",
         },
-        "color": "#9C27B0"
+        "color": "#8B5CF6"
     },
     "nature": {
         "labels": {
             "tree": "mdi:tree",
             "plant": "mdi:flower",
         },
-        "color": "#4CAF50"
+        "color": "#16A34A"
     }
 }
