@@ -28,7 +28,11 @@
   <a href="https://llmvision.org/card"> Visit Website →</a>
     </p>
 
-<img src="https://github.com/user-attachments/assets/97f6e608-bdf3-44d1-89f1-fd89cda7b764" width="50%" height="auto" />
+<p align="center">
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="./assets/cards-hero-dark.png">
+  <img alt="Timeline and Preview Card" src="./assets/cards-hero-light.png" width="512">
+</picture></p>
 
 ## Prerequisites
 1. [LLM Vision](https://github.com/valentinfrlch/ha-llmvision) set up in Home Assistant
@@ -51,59 +55,61 @@ Alternatively you can add the url of this repository to the custom repositories 
 
 # Configuration
 ## Timeline Card
-<img src="https://github.com/user-attachments/assets/b9402784-52aa-409d-be04-1fce47f2e658" width="40%">
-
->[!TIP]
->If both `number_of_events` and `number_of_hours` are set, the card will show events that occurred within the past specified number of hours, up to the specified number of events.
-
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="./assets/timeline-dark.png">
+  <img alt="Timeline Card" src="./assets/timeline-light.png" width="512">
+</picture>
 
 | Parameter         | Description                                                                                                 | Default                      |
 |-------------------|-------------------------------------------------------------------------------------------------------------|------------------------------|
-| entity            | LLM Vision Timeline Entity (needs to be set up in LLM Vision Settings first)                                |`calendar.llm_vision_timeline`|
-| number_of_hours   | Show events that occurred within the past specified number of hours.                                        | 24                           |
-| number_of_events  | How many events to show. Maximum is 10.                                                                     | 5                            |
+| header            | Shows a header (title) at the top of the card. Hidden when empty.                                           |
+| number_of_events  | How many events to show.                                                                                    | 100                          |
+| number_of_days    | Show events that occurred within the past specified number of days.                                         | 30                           |
 | category_filters  | Only show events matching one of the specified categories.                                                  | `[]`                         |
 | camera_filters    | Only show events matching one of the specified cameras.                                                     | `[]`                         |
+| filter_false_positives       | Show or hide activities titles "no activity" | `false`                         |
+| language          | Language used for the card UI (supports: `bg`, `ca`, `cs`, `de`, `en`, `es`, `fr`, `hu`, `it`, `nl`, `pl`, `pt`, `sk`, `sv`)    | `en`                         |
+| time_format       | 12h or 24h time format. | `24h`                         |
+| default_icon       | Icon to use when event couldn't be classified | `mdi:motion-sensor`                         |
 | custom_colors     | Custom colors for categories. Colors must be specified as a dictionary where keys are category names and values are lists of RGB values (e.g., `[255, 255, 0]`). See the example configuration below for details.    | `[]`                         |
-| language          | Language used for UI and generate icons (supports: `bg`, `ca`, `cs`, `de`, `en`, `es`, `fr`, `hu`, `it`, `nl`, `pl`, `pt`, `sk`, `sv`)    | `en`                         |
+
+
+
+
 
 ### Example Configuration
 ```yaml
 type: custom:llmvision-card
-entity: calendar.llm_vision_timeline
-number_of_hours: 24
-number_of_events: 5
+number_of_days: 365
+number_of_events: 100
+category_filters: []
+camera_filters: []
+default_icon: mdi:motion-sensor
 language: en
-category_filters:
-  - people
-  - animals
-  - vehicles
-custom_colors:
-  people:
-    - 251
-    - 255
-    - 0
-  vehicles:
-    - 143
-    - 143
-    - 143
+time_format: 12h
+filter_false_positives: true
 ```
 
 ## Preview Card
-<img src="https://github.com/user-attachments/assets/fce64634-cb68-4d8c-bd69-7e640a2de62c" width="40%">
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="./assets/preview.png">
+  <img alt="Preview Card" src="./assets/preview.png" width="512">
+</picture>
 
 | Parameter         | Description                                                                                                 | Default                      |
 |-------------------|-------------------------------------------------------------------------------------------------------------|------------------------------|
-| entity            | LLM Vision Timeline Entity (needs to be set up in LLM Vision Settings first)                                |`calendar.llm_vision_timeline`|
 | category_filters  | Only show events matching one of the specified categories.                                                  | `[]`                         |
 | camera_filters    | Only show events matching one of the specified cameras.                                                     | `[]`                         |
-| language          | Language used for UI and generate icons (supports: `bg`, `ca`, `cs`, `de`, `en`, `es`, `fr`, `hu`, `it`, `nl`, `pl`, `pt`, `sk`, `sv`)    | `en`                         |
+| filter_false_positives       | Show or hide activities titles "no activity" | `false`                         |
+| language          | Language used for the card UI (supports: `bg`, `ca`, `cs`, `de`, `en`, `es`, `fr`, `hu`, `it`, `nl`, `pl`, `pt`, `sk`, `sv`)    | `en`                         |
+| time_format       | 12h or 24h time format. | `24h`                         |
+| default_icon       | Icon to use when event couldn't be classified | `mdi:motion-sensor`                         |
 
 ### Example Configuration
 ```yaml
 type: custom:llmvision-preview-card
-entity: calendar.llm_vision_timeline
 language: en
+time_format: 12h
 category_filters:
   - people
 camera_filters:
