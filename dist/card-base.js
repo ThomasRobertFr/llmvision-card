@@ -820,7 +820,7 @@ export class BaseLLMVisionCard extends HTMLElement {
                                 <option value="Light">Light</option>
                                 <option value="Lock">Lock</option>
                                 <option value="Motorcycle">Motorcycle</option>
-                                <option value="Package">Package</option>
+                                <option value="Delivery">Delivery</option>
                                 <option value="Person">Person</option>
                                 <option value="Plant">Plant</option>
                                 <option value="Sensor">Sensor</option>
