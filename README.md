@@ -125,6 +125,8 @@ To provide feedback:
 3. In the menu, select either thumbs up or thumbs down, depending on how good the response is.
 4. If you selected thumbs down, select a reason and follow the remaining steps.
 
+_We don't collect personal information. Our [privacy policy](https://github.com/valentinfrlch/ha-llmvision/blob/main/PRIVACY.md) applies._
+
 
 ## Support
 You can support this project by starring this GitHub repository. If you want, you can also buy me a coffee here:
