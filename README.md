@@ -74,9 +74,6 @@ Alternatively you can add the url of this repository to the custom repositories 
 | custom_colors     | Custom colors for categories. Colors must be specified as a dictionary where keys are category names and values are lists of RGB values (e.g., `[255, 255, 0]`). See the example configuration below for details.    | `[]`                         |
 
 
-
-
-
 ### Example Configuration
 ```yaml
 type: custom:llmvision-card
@@ -115,6 +112,19 @@ category_filters:
 camera_filters:
   - camera.garage
 ```
+
+## Providing Feedback
+You can submit feedback for events to help make LLM Vision better for everyone. This helps us understand, what our users expect from a good event description.
+<picture>
+<img alt="Proving Feedback in LLM Vision" width="865" height="288" src="https://github.com/user-attachments/assets/333671eb-80fc-40fa-abce-caca6f5a29cc" />
+</picture>
+
+To provide feedback:
+1. Click on any event in the timeline or the preview card
+2. Click the three dots
+3. In the menu, select either thumbs up or thumbs down, depending on how good the response is.
+4. If you selected thumbs down, select a reason and follow the remaining steps.
+
 
 ## Support
 You can support this project by starring this GitHub repository. If you want, you can also buy me a coffee here:
