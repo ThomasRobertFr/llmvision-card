@@ -252,7 +252,7 @@ export class LLMVisionPreviewCard extends BaseLLMVisionCard {
                     startTime: event.startTime,
                     keyFrame: url,
                     cameraName: event.cameraName,
-                    category: category,
+                    category: event.category,
                     label: event.label,
                     icon: icon,
                     prefix: 'popup',
