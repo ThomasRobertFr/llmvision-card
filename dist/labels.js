@@ -18,7 +18,7 @@ export const labels = {
     },
     "delivery": {
         "labels": {
-            "package": "mdi:package-variant-closed"
+            "delivery": "mdi:package-variant-closed"
         },
         "color": "#EA580C"
     },

@@ -224,11 +224,13 @@ export class LLMVisionPreviewCard extends BaseLLMVisionCard {
         let event = details[0];
         const container = document.createElement('div');
         container.classList.add('preview-event-container');
-        const result = getIcon(event.title, this.language);
-        let { icon, color: defaultColor, category } = result;
+        const result = getIcon(event.category, event.label);
+        let { icon, color: defaultColor } = result;
+        console.log("icon result", result, event.title);
         if ((event.category === undefined || event.category === '') && this.default_icon) {
             icon = this.default_icon;
         }
+        console.log("icon", icon, event.title, result);
         let cameraName = event.cameraName;
         const dateObj = new Date(event.startTime);
         const dateLabel = this.formatDateLabel(dateObj);
