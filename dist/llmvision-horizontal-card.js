@@ -1,4 +1,4 @@
-import{i as e,n as t,o as n,r,t as i}from"./assets/lit-bphJfMXN.js";n(),i();var a=class extends t{static get properties(){return{_config:{type:Object}}}setConfig(e){this._config=e||{}}render(){if(!this._config)return r`<div>Please configure the card.</div>`;let e=this._getSchema().slice(0,2),t=this._getSchema().slice(2,7),n=this._getSchema().slice(7,7),i=this._getSchema().slice(7);return r`
+import{i as e,n as t,o as n,r,t as i}from"./assets/lit-Bu_JRvTe.js";n(),i();var a=class extends t{static get properties(){return{_config:{type:Object}}}setConfig(e){this._config=e||{}}render(){if(!this._config)return r`<div>Please configure the card.</div>`;let e=this._getSchema().slice(0,2),t=this._getSchema().slice(2,7),n=this._getSchema().slice(7,7),i=this._getSchema().slice(7);return r`
             <style>
                 .card-content {
                     display: flex;
