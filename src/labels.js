@@ -29,7 +29,7 @@ export const labels = {
             "bird": "mdi:bird",
             "animal": "mdi:paw"
         },
-        "color": "#F59E0B"
+        "color": "#00dd51"
     },
     "entity": {
         "labels": {
