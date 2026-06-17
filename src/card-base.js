@@ -167,7 +167,7 @@ export class BaseLLMVisionCard extends HTMLElement {
     resolveKeyFrame(hass, keyFrame) {
         if (!keyFrame) return Promise.resolve('');
         if (/^https?:\/\//i.test(keyFrame)) return Promise.resolve(keyFrame);
-        const mediaContentID = keyFrame.replace('/media/', 'media-source://media_source/local/');
+        const mediaContentID = keyFrame.replace('/media/', 'media-source://media_source/media/');
         if (this.imageCache.has(mediaContentID)) {
             return Promise.resolve(this.imageCache.get(mediaContentID));
         }
